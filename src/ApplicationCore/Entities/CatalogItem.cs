@@ -1,4 +1,5 @@
-﻿using Microsoft.eShopWeb.ApplicationCore.Interfaces;
+﻿using System.ComponentModel;
+using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 
 namespace Microsoft.eShopWeb.ApplicationCore.Entities
 {
@@ -9,8 +10,16 @@ namespace Microsoft.eShopWeb.ApplicationCore.Entities
         public decimal Price { get; set; }
         public string PictureUri { get; set; }
         public int CatalogTypeId { get; set; }
-        public CatalogType CatalogType { get; set; }
         public int CatalogBrandId { get; set; }
+
+        [DefaultValue(true)]
+        public bool ShowPrice { get; set; } = true;
+        
+
+        #region "Navigation properties"
+        public CatalogType CatalogType { get; set; }
         public CatalogBrand CatalogBrand { get; set; }
+        #endregion
+
     }
 }

@@ -56,12 +56,13 @@ namespace Microsoft.eShopWeb.Web.Services
 
             var vm = new CatalogIndexViewModel()
             {
-                CatalogItems = itemsOnPage.Select(i => new CatalogItemViewModel()
+                CatalogItems = itemsOnPage.Select(catalogItem => new CatalogItemViewModel()
                 {
-                    Id = i.Id,
-                    Name = i.Name,
-                    PictureUri = i.PictureUri,
-                    Price = i.Price
+                    Id = catalogItem.Id,
+                    Name = catalogItem.Name,
+                    PictureUri = catalogItem.PictureUri,
+                    Price = catalogItem.Price,
+                    ShowPrice = catalogItem.ShowPrice
                 }),
                 Brands = await GetBrands(),
                 Types = await GetTypes(),
