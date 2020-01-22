@@ -14,7 +14,7 @@ namespace Microsoft.eShopWeb.Web.Controllers.Api
         public async Task<IActionResult> List(int? brandFilterApplied, int? typesFilterApplied, int? page)
         {
             var itemsPage = 10;           
-            var catalogModel = await _catalogViewModelService.GetCatalogItems(page ?? 0, itemsPage, brandFilterApplied, typesFilterApplied);
+            var catalogModel = await _catalogViewModelService.GetCatalogItems(page ?? 0, itemsPage, brandFilterApplied, typesFilterApplied, HttpContext.RequestAborted);
             return Ok(catalogModel);
         }
     }

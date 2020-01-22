@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.eShopWeb.Web.ViewModels;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.eShopWeb.Web.Extensions;
+using System.Threading;
 
 namespace Microsoft.eShopWeb.Web.Services
 {
@@ -19,7 +20,7 @@ namespace Microsoft.eShopWeb.Web.Services
             _catalogViewModelService = catalogViewModelService;
         }
 
-        public async Task<IEnumerable<SelectListItem>> GetBrands()
+        public async Task<IEnumerable<SelectListItem>> GetBrands(CancellationToken cancellationToken = default(CancellationToken))
         {
             return await _cache.GetOrCreateAsync(CacheHelpers.GenerateBrandsCacheKey(), async entry =>
                     {
@@ -28,18 +29,18 @@ namespace Microsoft.eShopWeb.Web.Services
                     });
         }
 
-        public async Task<CatalogIndexViewModel> GetCatalogItems(int pageIndex, int itemsPage, int? brandId, int? typeId)
+        public async Task<CatalogIndexViewModel> GetCatalogItems(int pageIndex, int itemsPage, int? brandId, int? typeId, CancellationToken cancellationToken = default(CancellationToken))
         {
             var cacheKey = CacheHelpers.GenerateCatalogItemCacheKey(pageIndex, Constants.ITEMS_PER_PAGE, brandId, typeId);
 
             return await _cache.GetOrCreateAsync(cacheKey, async entry =>
             {
                 entry.SlidingExpiration = CacheHelpers.DefaultCacheDuration;
-                return await _catalogViewModelService.GetCatalogItems(pageIndex, itemsPage, brandId, typeId);
+                return await _catalogViewModelService.GetCatalogItems(pageIndex, itemsPage, brandId, typeId, cancellationToken);
             });
         }
 
-        public async Task<IEnumerable<SelectListItem>> GetTypes()
+        public async Task<IEnumerable<SelectListItem>> GetTypes(CancellationToken cancellationToken = default(CancellationToken))
         {
             return await _cache.GetOrCreateAsync(CacheHelpers.GenerateTypesCacheKey(), async entry =>
             {

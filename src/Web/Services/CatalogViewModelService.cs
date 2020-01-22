@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.eShopWeb.Web.Services
@@ -47,19 +48,22 @@ namespace Microsoft.eShopWeb.Web.Services
         /// </summary>
         /// <param name="catalogItem">Catalog item</param>
         /// <returns>CatalogItemViewModel</returns>
-        private async Task<CatalogItemViewModel> CreateCatalogItemViewModelAsync(CatalogItem catalogItem) {
+        private async Task<CatalogItemViewModel> CreateCatalogItemViewModelAsync(
+            CatalogItem catalogItem, CancellationToken cancellationToken = default(CancellationToken)) {
             return new CatalogItemViewModel()
                 {
                     Id = catalogItem.Id,
                     Name = catalogItem.Name,
                     PictureUri = catalogItem.PictureUri,
-                    Price = await _currencyService.Convert(catalogItem.Price, DEFAULT_PRICE_UNIT, USER_PRICE_UNIT),
+                    Price = await _currencyService.Convert(
+                        catalogItem.Price, DEFAULT_PRICE_UNIT, USER_PRICE_UNIT, cancellationToken),
                     ShowPrice = catalogItem.ShowPrice,
                     PriceUnit  = USER_PRICE_UNIT
                 };
         }
 
-        public async Task<CatalogIndexViewModel> GetCatalogItems(int pageIndex, int itemsPage, int? brandId, int? typeId)
+        public async Task<CatalogIndexViewModel> GetCatalogItems(int pageIndex, int itemsPage, int? brandId, int? typeId,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogInformation("GetCatalogItems called.");
 
@@ -75,10 +79,12 @@ namespace Microsoft.eShopWeb.Web.Services
             {
                 itemOnPage.PictureUri = _uriComposer.ComposePicUri(itemOnPage.PictureUri);
             }
-            
+            var CatalogItemsTask = Task.WhenAll(itemsOnPage.Select(
+                catalogItem => CreateCatalogItemViewModelAsync(catalogItem, cancellationToken)));
+            cancellationToken.ThrowIfCancellationRequested();
             var vm = new CatalogIndexViewModel()
             {
-                CatalogItems = await Task.WhenAll(itemsOnPage.Select(CreateCatalogItemViewModelAsync)),
+                CatalogItems = await CatalogItemsTask, // catalogItemsList,
                 Brands = await GetBrands(),
                 Types = await GetTypes(),
                 BrandFilterApplied = brandId ?? 0,
@@ -98,7 +104,7 @@ namespace Microsoft.eShopWeb.Web.Services
             return vm;
         }
 
-        public async Task<IEnumerable<SelectListItem>> GetBrands()
+        public async Task<IEnumerable<SelectListItem>> GetBrands(CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogInformation("GetBrands called.");
             var brands = await _brandRepository.ListAllAsync();
@@ -115,7 +121,7 @@ namespace Microsoft.eShopWeb.Web.Services
             return items;
         }
 
-        public async Task<IEnumerable<SelectListItem>> GetTypes()
+        public async Task<IEnumerable<SelectListItem>> GetTypes(CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogInformation("GetTypes called.");
             var types = await _typeRepository.ListAllAsync();
