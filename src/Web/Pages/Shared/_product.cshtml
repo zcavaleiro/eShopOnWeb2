@@ -9,6 +9,7 @@
     @if (@Model.ShowPrice) {
     <div class="esh-catalog-price">
         <span>@Model.Price.ToString("N2")</span>
+        @Model.PriceUnit.ToString()
     </div>
     }
     <input type="hidden" asp-for="@Model.Id" name="id" />

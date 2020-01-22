@@ -28,6 +28,9 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
 using Newtonsoft.Json;
+using Web.Extensions;
+using Infrastructure.Services;
+using Infrastructure.Services.CurrencyService;
 
 namespace Microsoft.eShopWeb.Web {
     public class Startup {
@@ -42,6 +45,8 @@ namespace Microsoft.eShopWeb.Web {
         public IConfiguration Configuration { get; }
 
         public void ConfigureDevelopmentServices(IServiceCollection services) {
+            services.AddSingleton<ICurrencyService, CurrencyServiceStatic>();
+            
             // use in-memory database
             ConfigureInMemoryDatabases(services);
             // use real database
@@ -60,6 +65,7 @@ namespace Microsoft.eShopWeb.Web {
         }
 
         public void ConfigureProductionServices(IServiceCollection services) {
+            services.AddSingleton<ICurrencyService, CurrencyServiceExternal>();
             // use real database
             // Requires LocalDB which can be installed with SQL Server Express 2016
             // https://www.microsoft.com/en-us/download/details.aspx?id=54284
@@ -86,18 +92,17 @@ namespace Microsoft.eShopWeb.Web {
 
             CreateIdentityIfNotCreated(services);
 
+
             services.AddMediatR(typeof(BasketViewModelService).Assembly);
 
+            if (_webHostEnvironment.IsDevelopment()) {
+                services.AddSingleton<ICurrencyService, CurrencyServiceStatic>();
+            } else {
+                services.AddSingleton<ICurrencyService, CurrencyServiceExternal>();
+            }
+            
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
-            services.AddScoped<ICatalogViewModelService, CachedCatalogViewModelService>();
-            services.AddScoped<IBasketService, BasketService>();
-            services.AddScoped<IBasketViewModelService, BasketViewModelService>();
-            services.AddScoped<IOrderService, OrderService>();
-            services.AddScoped<IOrderRepository, OrderRepository>();
-            services.AddScoped<CatalogViewModelService>();
-            services.AddScoped<ICatalogItemViewModelService, CatalogItemViewModelService>();
-            services.Configure<CatalogSettings>(Configuration);
-            services.AddSingleton<IUriComposer>(new UriComposer(Configuration.Get<CatalogSettings>()));
+            services.AddCatalogServices(Configuration);
             services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
             services.AddTransient<IEmailSender, EmailSender>();
 
@@ -168,6 +173,7 @@ namespace Microsoft.eShopWeb.Web {
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
+
             app.UseHealthChecks("/health",
                 new HealthCheckOptions {
                     ResponseWriter = async(context, report) => {

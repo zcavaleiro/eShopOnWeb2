@@ -22,19 +22,41 @@ namespace Microsoft.eShopWeb.Web.Services
         private readonly IAsyncRepository<CatalogBrand> _brandRepository;
         private readonly IAsyncRepository<CatalogType> _typeRepository;
         private readonly IUriComposer _uriComposer;
-
+        private readonly ICurrencyService _currencyService;
+        private const Currency DEFAULT_PRICE_UNIT = Currency.USD; // TODO: Get from Configuration
+        private const Currency USER_PRICE_UNIT = Currency.EUR; // TODO: Get from IUserCurrencyService    
         public CatalogViewModelService(
             ILoggerFactory loggerFactory,
             IAsyncRepository<CatalogItem> itemRepository,
             IAsyncRepository<CatalogBrand> brandRepository,
             IAsyncRepository<CatalogType> typeRepository,
-            IUriComposer uriComposer)
+            IUriComposer uriComposer,
+            ICurrencyService currencyService
+        )
         {
             _logger = loggerFactory.CreateLogger<CatalogViewModelService>();
             _itemRepository = itemRepository;
             _brandRepository = brandRepository;
             _typeRepository = typeRepository;
             _uriComposer = uriComposer;
+            _currencyService = currencyService;
+        }
+
+        /// <summary>
+        /// Create a catalog item view model from a catalog item data model
+        /// </summary>
+        /// <param name="catalogItem">Catalog item</param>
+        /// <returns>CatalogItemViewModel</returns>
+        private async Task<CatalogItemViewModel> CreateCatalogItemViewModelAsync(CatalogItem catalogItem) {
+            return new CatalogItemViewModel()
+                {
+                    Id = catalogItem.Id,
+                    Name = catalogItem.Name,
+                    PictureUri = catalogItem.PictureUri,
+                    Price = await _currencyService.Convert(catalogItem.Price, DEFAULT_PRICE_UNIT, USER_PRICE_UNIT),
+                    ShowPrice = catalogItem.ShowPrice,
+                    PriceUnit  = USER_PRICE_UNIT
+                };
         }
 
         public async Task<CatalogIndexViewModel> GetCatalogItems(int pageIndex, int itemsPage, int? brandId, int? typeId)
@@ -53,17 +75,10 @@ namespace Microsoft.eShopWeb.Web.Services
             {
                 itemOnPage.PictureUri = _uriComposer.ComposePicUri(itemOnPage.PictureUri);
             }
-
+            
             var vm = new CatalogIndexViewModel()
             {
-                CatalogItems = itemsOnPage.Select(catalogItem => new CatalogItemViewModel()
-                {
-                    Id = catalogItem.Id,
-                    Name = catalogItem.Name,
-                    PictureUri = catalogItem.PictureUri,
-                    Price = catalogItem.Price,
-                    ShowPrice = catalogItem.ShowPrice
-                }),
+                CatalogItems = await Task.WhenAll(itemsOnPage.Select(CreateCatalogItemViewModelAsync)),
                 Brands = await GetBrands(),
                 Types = await GetTypes(),
                 BrandFilterApplied = brandId ?? 0,
