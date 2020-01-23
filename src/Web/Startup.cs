@@ -31,6 +31,7 @@ using Newtonsoft.Json;
 using Web.Extensions;
 using Infrastructure.Services;
 using Infrastructure.Services.CurrencyService;
+using Web.Extensions.Middleware;
 
 namespace Microsoft.eShopWeb.Web {
     public class Startup {
@@ -86,12 +87,45 @@ namespace Microsoft.eShopWeb.Web {
             ConfigureInMemoryDatabases(services);
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services) {
+        
+        private static void CreateIdentityIfNotCreated(IServiceCollection services) {
+            var sp = services.BuildServiceProvider();
+            using(var scope = sp.CreateScope()) {
+                var existingUserManager = scope.ServiceProvider
+                    .GetService<UserManager<ApplicationUser>>();
+                if (existingUserManager == null) {
+                    services.AddIdentity<ApplicationUser, IdentityRole>()
+                        .AddDefaultUI()
+                        .AddEntityFrameworkStores<AppIdentityDbContext>()
+                        .AddDefaultTokenProviders();
+                }
+            }
+        }
+
+        private static void ConfigureCookieSettings(IServiceCollection services) {
+            services.Configure<CookiePolicyOptions>(options => {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+            services.ConfigureApplicationCookie(options => {
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromHours(1);
+                options.LoginPath = "/Account/Login";
+                options.LogoutPath = "/Account/Logout";
+                options.Cookie = new CookieBuilder {
+                    IsEssential = true // required for auth to work without explicit user consent; adjust to suit your privacy policy
+                };
+            });
+        }
+
+
+    // This method gets called by the runtime. Use this method to add services to the container.
+      
+    public void ConfigureServices(IServiceCollection services) {
             ConfigureCookieSettings(services);
 
             CreateIdentityIfNotCreated(services);
-
 
             services.AddMediatR(typeof(BasketViewModelService).Assembly);
 
@@ -140,40 +174,9 @@ namespace Microsoft.eShopWeb.Web {
             _services = services; // used to debug registered services
         }
 
-        private static void CreateIdentityIfNotCreated(IServiceCollection services) {
-            var sp = services.BuildServiceProvider();
-            using(var scope = sp.CreateScope()) {
-                var existingUserManager = scope.ServiceProvider
-                    .GetService<UserManager<ApplicationUser>>();
-                if (existingUserManager == null) {
-                    services.AddIdentity<ApplicationUser, IdentityRole>()
-                        .AddDefaultUI()
-                        .AddEntityFrameworkStores<AppIdentityDbContext>()
-                        .AddDefaultTokenProviders();
-                }
-            }
-        }
-
-        private static void ConfigureCookieSettings(IServiceCollection services) {
-            services.Configure<CookiePolicyOptions>(options => {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
-            services.ConfigureApplicationCookie(options => {
-                options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromHours(1);
-                options.LoginPath = "/Account/Login";
-                options.LogoutPath = "/Account/Logout";
-                options.Cookie = new CookieBuilder {
-                    IsEssential = true // required for auth to work without explicit user consent; adjust to suit your privacy policy
-                };
-            });
-        }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
-
+            app.UseBenchmarking();
             app.UseHealthChecks("/health",
                 new HealthCheckOptions {
                     ResponseWriter = async(context, report) => {
@@ -208,6 +211,7 @@ namespace Microsoft.eShopWeb.Web {
             app.UseAuthorization();
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
+            
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
             // specifying the Swagger JSON endpoint.
