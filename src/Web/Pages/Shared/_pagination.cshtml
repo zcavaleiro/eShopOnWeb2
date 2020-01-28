@@ -1,5 +1,13 @@
 ﻿@model PaginationInfoViewModel
 
+@{
+	IDictionary<string, string> buildQueryStringDict(int page) {
+		var queryStringDict = Context.Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString());
+		queryStringDict["pageid"] = page.ToString();
+		return queryStringDict;
+	}
+}
+
 <div class="esh-pager">
 	<div class="container-fluid">
 		<article class="esh-pager-wrapper row">
@@ -7,7 +15,8 @@
 				<div class="col-md-2 col-xs-12">
 					<a class="esh-pager-item-left esh-pager-item--navigable esh-pager-item @Model.Previous"
 					   id="Previous"
-					   asp-route-pageid="@(Model.ActualPage - 1)"
+					   asp-all-route-data="@buildQueryStringDict(Model.ActualPage - 1)"
+					   
 					   aria-label="Previous">
 						Previous
 					</a>
@@ -22,7 +31,8 @@
 				<div class="col-md-2 col-xs-12">
 					<a class="esh-pager-item-right esh-pager-item--navigable esh-pager-item @Model.Next"
 					   id="Next"
-					   asp-route-pageid="@(Model.ActualPage + 1)"
+					   asp-all-route-data="@buildQueryStringDict(Model.ActualPage + 1)"
+					   
 					   aria-label="Next">
 						Next
 					</a>

@@ -1,0 +1,29 @@
+@model IEnumerable<CatalogItemViewModel>
+
+<table>
+    <thead>
+        <th>Name</th>
+        <th>Price</th>
+        <th></th>
+    </thead>
+    <tbody>
+    @foreach (var catalogItem in Model)
+    {
+        <tr>
+            <td>@catalogItem.Name</td>
+            <td>
+                <span>@catalogItem.Price</span>
+                <span>@catalogItem.PriceUnit</span>
+            <td>
+                <form asp-page="/Basket/Index" method="post">
+                    <input class="esh-catalog-button" style="width: auto" type="submit" value="[ ADD TO BASKET ]" />
+                    <input type="hidden" asp-for="@catalogItem.Id" name="id" />
+                    <input type="hidden" asp-for="@catalogItem.Name" name="name" />
+                    <input type="hidden" asp-for="@catalogItem.PictureUri" name="pictureUri" />
+                    <input type="hidden" asp-for="@catalogItem.Price" name="price" />
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,23 @@
+@model ListViewModel
+
+@if(Model.Unordered) {
+    <ul class="@Model.ListClass">
+    @foreach (var item in Model.Items)
+    {
+        <li class="@Model.ListItemClass">
+            @Model.ItemTemplate(item)
+        </li>
+    }
+    </ul>
+}
+else
+{
+    <ol class="@Model.ListClass">
+    @foreach (var item in Model.Items)
+    {
+        <li class="@Model.ListItemClass">
+            @Model.ItemTemplate(item)
+        </li>
+    }
+    </ol>
+}
