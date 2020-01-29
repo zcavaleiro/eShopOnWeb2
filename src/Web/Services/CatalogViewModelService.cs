@@ -136,5 +136,28 @@ namespace Microsoft.eShopWeb.Web.Services
 
             return items;
         }
+
+        public async Task<CatalogItemViewModel> GetItemById(int id, CancellationToken cancellationToken = default)
+        {
+            try {
+                var item = await _itemRepository.GetByIdAsync(id);
+                if (item == null) {
+                    throw new ModelNotFoundException($"Catalog item not found. id={id}");
+                }
+                var catalogItemViewModel = await CreateCatalogItemViewModelAsync(
+                    item, cancellationToken);
+                return catalogItemViewModel;
+            } catch (Exception ex) {
+                throw new ModelNotFoundException($"Catalog item not found. id={id}", ex);
+            }
+        }
+    }
+
+    public class ModelNotFoundException: Exception {
+
+        public ModelNotFoundException(string message, Exception innerException = null)
+            : base(message, innerException) {
+
+            }
     }
 }

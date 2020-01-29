@@ -5,6 +5,7 @@ using Microsoft.eShopWeb.Web.ViewModels;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.eShopWeb.Web.Extensions;
 using System.Threading;
+using System;
 
 namespace Microsoft.eShopWeb.Web.Services
 {
@@ -31,13 +32,22 @@ namespace Microsoft.eShopWeb.Web.Services
 
         public async Task<CatalogIndexViewModel> GetCatalogItems(int pageIndex, int itemsPage, int? brandId, int? typeId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var cacheKey = CacheHelpers.GenerateCatalogItemCacheKey(pageIndex, Constants.ITEMS_PER_PAGE, brandId, typeId);
+            var cacheKey = CacheHelpers.GenerateCatalogItemCacheKey(
+                pageIndex,
+                Constants.ITEMS_PER_PAGE,
+                brandId,
+                typeId);
 
             return await _cache.GetOrCreateAsync(cacheKey, async entry =>
             {
                 entry.SlidingExpiration = CacheHelpers.DefaultCacheDuration;
                 return await _catalogViewModelService.GetCatalogItems(pageIndex, itemsPage, brandId, typeId, cancellationToken);
             });
+        }
+
+        public Task<CatalogItemViewModel> GetItemById(int id, CancellationToken cancellationToken = default)
+        {
+            return _catalogViewModelService.GetItemById(id);
         }
 
         public async Task<IEnumerable<SelectListItem>> GetTypes(CancellationToken cancellationToken = default(CancellationToken))

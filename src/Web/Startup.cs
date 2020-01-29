@@ -5,6 +5,9 @@ using System.Net.Mime;
 
 using Ardalis.ListStartupServices;
 
+using Infrastructure.Services;
+using Infrastructure.Services.CurrencyService;
+
 using MediatR;
 
 using Microsoft.AspNetCore.Builder;
@@ -12,6 +15,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Services;
@@ -28,11 +32,11 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
 using Newtonsoft.Json;
+
 using Web.Extensions;
-using Infrastructure.Services;
-using Infrastructure.Services.CurrencyService;
 using Web.Extensions.Middleware;
 
+[assembly : ApiConventionType(typeof(DefaultApiConventions))]
 namespace Microsoft.eShopWeb.Web {
     public class Startup {
         private IServiceCollection _services;
@@ -47,7 +51,7 @@ namespace Microsoft.eShopWeb.Web {
 
         public void ConfigureDevelopmentServices(IServiceCollection services) {
             services.AddSingleton<ICurrencyService, CurrencyServiceStatic>();
-            
+
             // use in-memory database
             ConfigureInMemoryDatabases(services);
             // use real database
@@ -87,7 +91,6 @@ namespace Microsoft.eShopWeb.Web {
             ConfigureInMemoryDatabases(services);
         }
 
-        
         private static void CreateIdentityIfNotCreated(IServiceCollection services) {
             var sp = services.BuildServiceProvider();
             using(var scope = sp.CreateScope()) {
@@ -119,10 +122,9 @@ namespace Microsoft.eShopWeb.Web {
             });
         }
 
+        // This method gets called by the runtime. Use this method to add services to the container.
 
-    // This method gets called by the runtime. Use this method to add services to the container.
-      
-    public void ConfigureServices(IServiceCollection services) {
+        public void ConfigureServices(IServiceCollection services) {
             ConfigureCookieSettings(services);
 
             CreateIdentityIfNotCreated(services);
@@ -134,7 +136,7 @@ namespace Microsoft.eShopWeb.Web {
             } else {
                 services.AddSingleton<ICurrencyService, CurrencyServiceExternal>();
             }
-            
+
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
             services.AddCatalogServices(Configuration);
             services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
@@ -193,7 +195,7 @@ namespace Microsoft.eShopWeb.Web {
                     }
                 });
             if (env.IsDevelopment()) {
-                app.UseDeveloperExceptionPage();
+                // app.UseDeveloperExceptionPage();
                 app.UseShowAllServicesMiddleware();
                 app.UseDatabaseErrorPage();
             } else {
@@ -203,7 +205,7 @@ namespace Microsoft.eShopWeb.Web {
             }
 
             app.UseStaticFiles();
-            
+
             app.UseRouting();
 
             app.UseHttpsRedirection();
@@ -212,7 +214,7 @@ namespace Microsoft.eShopWeb.Web {
             app.UseAuthorization();
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
-            
+
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c => {
@@ -225,7 +227,7 @@ namespace Microsoft.eShopWeb.Web {
                 endpoints.MapHealthChecks("home_page_health_check");
                 endpoints.MapHealthChecks("api_health_check");
             });
-            
+
         }
     }
 }
