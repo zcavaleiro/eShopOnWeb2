@@ -9,16 +9,16 @@ namespace Microsoft.eShopWeb.UnitTests
     public class CatalogFilterSpecificationFilter
     {
         [Theory]
-        [InlineData(null, null, 5)]
-        [InlineData(1, null, 3)]
-        [InlineData(2, null, 2)]
-        [InlineData(null, 1, 2)]
-        [InlineData(null, 3, 1)]
-        [InlineData(1, 3, 1)]
-        [InlineData(2, 3, 0)]
-        public void MatchesExpectedNumberOfItems(int? brandId, int? typeId, int expectedCount)
+        [InlineData(null, null, null, 5)]
+        [InlineData(null, 1, null, 3)]
+        [InlineData(null, 2, null, 2)]
+        [InlineData(null, null, 1, 2)]
+        [InlineData(null, null, 3, 1)]
+        [InlineData(null, 1, 3, 1)]
+        [InlineData(null, 2, 3, 0)]
+        public void MatchesExpectedNumberOfItems(string searchText, int? brandId, int? typeId, int expectedCount)
         {
-            var spec = new CatalogFilterSpecification(brandId, typeId);
+            var spec = new CatalogFilterSpecification(searchText, brandId, typeId);
 
             var result = GetTestItemCollection()
                 .AsQueryable()

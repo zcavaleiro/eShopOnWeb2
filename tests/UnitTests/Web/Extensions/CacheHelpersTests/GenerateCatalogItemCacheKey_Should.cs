@@ -10,10 +10,11 @@ namespace Microsoft.eShopWeb.UnitTests.Web.Extensions.CacheHelpersTests
         public void ReturnCatalogItemCacheKey()
         {
             var pageIndex = 0;
+            string searchText = null;
             int? brandId = null;
             int? typeId = null;
 
-            var result = CacheHelpers.GenerateCatalogItemCacheKey(pageIndex, Constants.ITEMS_PER_PAGE, brandId, typeId);
+            var result = CacheHelpers.GenerateCatalogItemCacheKey(pageIndex, Constants.ITEMS_PER_PAGE, searchText, brandId, typeId);
 
             Assert.Equal("items-0-10--", result);
         }

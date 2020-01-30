@@ -18,7 +18,12 @@ namespace Microsoft.eShopWeb.Web.Pages {
         public CatalogIndexViewModel CatalogModel { get; set; } = new CatalogIndexViewModel();
 
         public async Task OnGet(CatalogIndexViewModel catalogModel, int? pageId) {
-            CatalogModel = await _catalogViewModelService.GetCatalogItems(pageId ?? 0, Constants.ITEMS_PER_PAGE, catalogModel.BrandFilterApplied, catalogModel.TypesFilterApplied, HttpContext.RequestAborted);
+            CatalogModel = await _catalogViewModelService.GetCatalogItems(
+                pageId ?? 0, Constants.ITEMS_PER_PAGE,
+                "TODO",
+                catalogModel.BrandFilterApplied, catalogModel.TypesFilterApplied,
+                convertPrice: true,
+                HttpContext.RequestAborted);
             CatalogModel.ResultView = catalogModel.ResultView; // HACK
             CatalogModel.ResultViews = Enum<ResultView>.GetAll()
                 .Select(resultView => new SelectListItem { Value = resultView.ToString(), Text = resultView.ToString() });
