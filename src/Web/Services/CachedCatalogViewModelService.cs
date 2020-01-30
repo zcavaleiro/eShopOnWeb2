@@ -45,9 +45,14 @@ namespace Microsoft.eShopWeb.Web.Services
             });
         }
 
-        public Task<CatalogItemViewModel> GetItemById(int id, CancellationToken cancellationToken = default)
+        public async Task<CatalogItemViewModel> GetItemById(int id, CancellationToken cancellationToken = default)
         {
-            return _catalogViewModelService.GetItemById(id);
+            return await _cache.GetOrCreateAsync(
+                CacheHelpers.GenerateCatalogItemIdKey(id), async entry =>
+            {
+                entry.SlidingExpiration = CacheHelpers.DefaultCacheDuration;
+                return await _catalogViewModelService.GetItemById(id);
+            });
         }
 
         public async Task<IEnumerable<SelectListItem>> GetTypes(CancellationToken cancellationToken = default(CancellationToken))

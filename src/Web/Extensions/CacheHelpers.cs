@@ -12,6 +12,10 @@ namespace Microsoft.eShopWeb.Web.Extensions
             return string.Format(_itemsKeyTemplate, pageIndex, itemsPage, brandId, typeId);
         }
 
+        public static string GenerateCatalogItemIdKey(int id) {
+            return $"catalog_item_{id}";
+        }
+
         public static string GenerateBrandsCacheKey()
         {
             return "brands";
