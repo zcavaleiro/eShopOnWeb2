@@ -1,4 +1,5 @@
-﻿using Microsoft.eShopWeb.Web;
+﻿using System;
+using Microsoft.eShopWeb.Web;
 using Microsoft.eShopWeb.Web.Extensions;
 using Xunit;
 
@@ -6,17 +7,36 @@ namespace Microsoft.eShopWeb.UnitTests.Web.Extensions.CacheHelpersTests
 {
     public class GenerateCatalogItemCacheKey_Should
     {
-        [Fact]
-        public void ReturnCatalogItemCacheKey()
+        [Theory]
+        [InlineData(0, Constants.ITEMS_PER_PAGE, null, null, null, "items-0-10---")]
+        [InlineData(5, 20, null, null, null, "items-5-20---")]
+        [InlineData(-5, 20, null, null, null, null, typeof(InvalidPageIndexException))]
+        public void ReturnCatalogItemCacheKey(
+            int pageIndex,
+            int itemPerPage,
+            string searchText,
+            int? brandId,
+            int? typeId,
+            string expectedResult,
+            Type exceptionType = null
+        )
         {
-            var pageIndex = 0;
-            string searchText = null;
-            int? brandId = null;
-            int? typeId = null;
+            if (string.IsNullOrEmpty(expectedResult)) {
+                if (exceptionType == null) {
+                    throw new Exception("Missing exception type to check");
+                }
+                Assert.Throws(
+                    exceptionType,
+                    () => CacheHelpers.GenerateCatalogItemCacheKey(
+                    pageIndex, itemPerPage, searchText, brandId, typeId));
+            }
+            else 
+            {
+                var result = CacheHelpers.GenerateCatalogItemCacheKey(
+                    pageIndex, itemPerPage, searchText, brandId, typeId);
 
-            var result = CacheHelpers.GenerateCatalogItemCacheKey(pageIndex, Constants.ITEMS_PER_PAGE, searchText, brandId, typeId);
-
-            Assert.Equal("items-0-10--", result);
+                Assert.Equal(expectedResult, result);
+            }
         }
     }
 }
