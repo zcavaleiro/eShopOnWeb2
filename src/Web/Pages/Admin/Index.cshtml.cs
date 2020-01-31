@@ -28,7 +28,7 @@ namespace Microsoft.eShopWeb.Web.Pages.Admin
             var cacheKey = CacheHelpers.GenerateCatalogItemCacheKey(
                 pageId.GetValueOrDefault(),
                 Constants.ITEMS_PER_PAGE,
-                "TODO",
+                catalogModel.SearchText,
                 catalogModel.BrandFilterApplied,
                 catalogModel.TypesFilterApplied);
 
@@ -37,7 +37,7 @@ namespace Microsoft.eShopWeb.Web.Pages.Admin
             CatalogModel = await _catalogViewModelService.GetCatalogItems(
                 pageId.GetValueOrDefault(),
                 Constants.ITEMS_PER_PAGE,
-                "TODO",
+                catalogModel.SearchText,
                 catalogModel.BrandFilterApplied,
                 catalogModel.TypesFilterApplied,
                 convertPrice: false,

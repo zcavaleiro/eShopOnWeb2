@@ -139,6 +139,7 @@ namespace Microsoft.eShopWeb.Web.Services
                 Types = await GetTypes(),
                 BrandFilterApplied = brandId ?? 0,
                 TypesFilterApplied = typeId ?? 0,
+                SearchText = searchText,
                 PaginationInfo = new PaginationInfoViewModel()
                 {
                     ActualPage = pageIndex,

@@ -22,13 +22,18 @@
             <label class="esh-catalog-label" data-title="type">
                 <select asp-for="@Model.CatalogModel.TypesFilterApplied"
                 asp-items="@Model.CatalogModel.Types"
-                class="esh-catalog-filter"></select>
+                class="esh-catalog-filter">
+                </select>
             </label>
+            <input type="text" asp-for="@Model.CatalogModel.SearchText"
+                value="@Model.CatalogModel.SearchText" />
             <input class="esh-catalog-send" type="image" src="images/arrow-right.svg" />
         </form>
     </div>
 </section>
 <div class="container">
+    <p>@Model.CatalogModel.SearchText</p>
+    <p>@Model.CatalogModel.ResultView</p>
     @if (Model.CatalogModel.CatalogItems.Any())
     {
         @await Html.PartialAsync("_pagination", Model.CatalogModel.PaginationInfo);

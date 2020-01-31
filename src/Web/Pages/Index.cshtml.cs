@@ -20,7 +20,7 @@ namespace Microsoft.eShopWeb.Web.Pages {
         public async Task OnGet(CatalogIndexViewModel catalogModel, int? pageId) {
             CatalogModel = await _catalogViewModelService.GetCatalogItems(
                 pageId ?? 0, Constants.ITEMS_PER_PAGE,
-                "TODO",
+                catalogModel.SearchText,
                 catalogModel.BrandFilterApplied, catalogModel.TypesFilterApplied,
                 convertPrice: true,
                 HttpContext.RequestAborted);
