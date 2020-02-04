@@ -36,20 +36,24 @@ using Newtonsoft.Json;
 using Web.Extensions;
 using Web.Extensions.Middleware;
 
-[assembly : ApiConventionType(typeof(DefaultApiConventions))]
-namespace Microsoft.eShopWeb.Web {
-    public class Startup {
+[assembly: ApiConventionType(typeof(DefaultApiConventions))]
+namespace Microsoft.eShopWeb.Web
+{
+    public class Startup
+    {
         private IServiceCollection _services;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment) {
+        public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
+        {
             Configuration = configuration;
             _webHostEnvironment = webHostEnvironment;
         }
 
         public IConfiguration Configuration { get; }
 
-        public void ConfigureDevelopmentServices(IServiceCollection services) {
+        public void ConfigureDevelopmentServices(IServiceCollection services)
+        {
             services.AddSingleton<ICurrencyService, CurrencyServiceStatic>();
 
             // use in-memory database
@@ -57,7 +61,8 @@ namespace Microsoft.eShopWeb.Web {
             // use real database
         }
 
-        private void ConfigureInMemoryDatabases(IServiceCollection services) {
+        private void ConfigureInMemoryDatabases(IServiceCollection services)
+        {
             // use in-memory database
             services.AddDbContext<CatalogContext>(c =>
                 c.UseInMemoryDatabase("Catalog"));
@@ -69,7 +74,8 @@ namespace Microsoft.eShopWeb.Web {
             ConfigureServices(services);
         }
 
-        public void ConfigureProductionServices(IServiceCollection services) {
+        public void ConfigureProductionServices(IServiceCollection services)
+        {
             services.AddSingleton<ICurrencyService, CurrencyServiceExternal>();
             // use real database
             // Requires LocalDB which can be installed with SQL Server Express 2016
@@ -83,20 +89,25 @@ namespace Microsoft.eShopWeb.Web {
 
             ConfigureServices(services);
         }
-        public void ConfigureAzureServices(IServiceCollection services) {
+        public void ConfigureAzureServices(IServiceCollection services)
+        {
             ConfigureProductionServices(services);
         }
 
-        public void ConfigureTestingServices(IServiceCollection services) {
+        public void ConfigureTestingServices(IServiceCollection services)
+        {
             ConfigureInMemoryDatabases(services);
         }
 
-        private static void CreateIdentityIfNotCreated(IServiceCollection services) {
+        private static void CreateIdentityIfNotCreated(IServiceCollection services)
+        {
             var sp = services.BuildServiceProvider();
-            using(var scope = sp.CreateScope()) {
+            using (var scope = sp.CreateScope())
+            {
                 var existingUserManager = scope.ServiceProvider
                     .GetService<UserManager<ApplicationUser>>();
-                if (existingUserManager == null) {
+                if (existingUserManager == null)
+                {
                     services.AddIdentity<ApplicationUser, IdentityRole>()
                         .AddDefaultUI()
                         .AddEntityFrameworkStores<AppIdentityDbContext>()
@@ -105,18 +116,22 @@ namespace Microsoft.eShopWeb.Web {
             }
         }
 
-        private static void ConfigureCookieSettings(IServiceCollection services) {
-            services.Configure<CookiePolicyOptions>(options => {
+        private static void ConfigureCookieSettings(IServiceCollection services)
+        {
+            services.Configure<CookiePolicyOptions>(options =>
+            {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-            services.ConfigureApplicationCookie(options => {
+            services.ConfigureApplicationCookie(options =>
+            {
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromHours(1);
                 options.LoginPath = "/Account/Login";
                 options.LogoutPath = "/Account/Logout";
-                options.Cookie = new CookieBuilder {
+                options.Cookie = new CookieBuilder
+                {
                     IsEssential = true // required for auth to work without explicit user consent; adjust to suit your privacy policy
                 };
             });
@@ -124,16 +139,32 @@ namespace Microsoft.eShopWeb.Web {
 
         // This method gets called by the runtime. Use this method to add services to the container.
 
-        public void ConfigureServices(IServiceCollection services) {
+        public void ConfigureServices(IServiceCollection services)
+        {
             ConfigureCookieSettings(services);
+
+            services.AddAuthentication();
+
+            services.AddAuthentication()
+            .AddGoogle(options =>
+            {
+                IConfigurationSection googleAuthNSection =
+                    Configuration.GetSection("Authentication:Google");
+
+                options.ClientId = googleAuthNSection["client_id"];
+                options.ClientSecret = googleAuthNSection["client_secret"];
+            });
 
             CreateIdentityIfNotCreated(services);
 
             services.AddMediatR(typeof(BasketViewModelService).Assembly);
 
-            if (_webHostEnvironment.IsDevelopment()) {
+            if (_webHostEnvironment.IsDevelopment())
+            {
                 services.AddSingleton<ICurrencyService, CurrencyServiceStatic>();
-            } else {
+            }
+            else
+            {
                 services.AddSingleton<ICurrencyService, CurrencyServiceExternal>();
             }
 
@@ -145,18 +176,21 @@ namespace Microsoft.eShopWeb.Web {
             // Add memory cache services
             services.AddMemoryCache();
 
-            services.AddRouting(options => {
+            services.AddRouting(options =>
+            {
                 // Replace the type and the name used to refer to it with your own
                 // IOutboundParameterTransformer implementation
                 options.ConstraintMap["slugify"] = typeof(SlugifyParameterTransformer);
             });
 
-            services.AddMvc(options => {
+            services.AddMvc(options =>
+            {
                 options.Conventions.Add(new RouteTokenTransformerConvention(
                     new SlugifyParameterTransformer()));
 
             });
-            services.AddRazorPages(options => {
+            services.AddRazorPages(options =>
+            {
                 options.Conventions.AuthorizePage("/Basket/Checkout");
             });
             services.AddControllersWithViews();
@@ -167,7 +201,8 @@ namespace Microsoft.eShopWeb.Web {
 
             services.AddHealthChecks();
 
-            services.Configure<ServiceConfig>(config => {
+            services.Configure<ServiceConfig>(config =>
+            {
                 config.Services = new List<ServiceDescriptor>(services);
 
                 config.Path = "/allservices";
@@ -177,28 +212,36 @@ namespace Microsoft.eShopWeb.Web {
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
             app.UseBenchmarking();
             app.UseHealthChecks("/health",
-                new HealthCheckOptions {
-                    ResponseWriter = async(context, report) => {
+                new HealthCheckOptions
+                {
+                    ResponseWriter = async (context, report) =>
+                    {
                         var result = JsonConvert.SerializeObject(
-                            new {
+                            new
+                            {
                                 status = report.Status.ToString(),
-                                    errors = report.Entries.Select(e => new {
-                                        key = e.Key,
-                                            value = Enum.GetName(typeof(HealthStatus), e.Value.Status)
-                                    })
+                                errors = report.Entries.Select(e => new
+                                {
+                                    key = e.Key,
+                                    value = Enum.GetName(typeof(HealthStatus), e.Value.Status)
+                                })
                             });
                         context.Response.ContentType = MediaTypeNames.Application.Json;
                         await context.Response.WriteAsync(result);
                     }
                 });
-            if (env.IsDevelopment()) {
+            if (env.IsDevelopment())
+            {
                 // app.UseDeveloperExceptionPage();
                 app.UseShowAllServicesMiddleware();
                 app.UseDatabaseErrorPage();
-            } else {
+            }
+            else
+            {
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
@@ -217,11 +260,13 @@ namespace Microsoft.eShopWeb.Web {
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
             // specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c => {
+            app.UseSwaggerUI(c =>
+            {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
 
-            app.UseEndpoints(endpoints => {
+            app.UseEndpoints(endpoints =>
+            {
                 endpoints.MapControllerRoute("default", "{controller:slugify=Home}/{action:slugify=Index}/{id?}");
                 endpoints.MapRazorPages();
                 endpoints.MapHealthChecks("home_page_health_check");
