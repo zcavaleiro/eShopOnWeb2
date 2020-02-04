@@ -41,7 +41,8 @@ namespace Microsoft.eShopWeb.UnitTests.ApplicationCore.Services.BasketServiceTes
         }
 
         [Fact]
-        public async Task Update_ExistingItemQty_Succeeds() {
+        public async Task Update_ExistingItemQty_Succeeds()
+        {
             var basketId = 10;
             var basket = new Basket();
             var itemId = 1;
