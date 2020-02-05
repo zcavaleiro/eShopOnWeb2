@@ -41,8 +41,7 @@ namespace Microsoft.eShopWeb.UnitTests.ApplicationCore.Services.BasketServiceTes
         }
 
         [Fact]
-        public async Task Update_ExistingItemQty_Succeeds()
-        {
+        public async Task Update_ExistingItemQty_Succeeds() {
             var basketId = 10;
             var basket = new Basket();
             var itemId = 1;
@@ -82,7 +81,7 @@ namespace Microsoft.eShopWeb.UnitTests.ApplicationCore.Services.BasketServiceTes
             var basket = new Basket();
             var itemPrice = 10;
             // CREATE INITIAL BASKET
-            foreach (var itemId in Enumerable.Range(1, numInitiallItemsBasket)) {
+            foreach (var itemId in Enumerable.Range(1, numInitiallItemsBasket)) {
                 var initialQty = random.Next(1, 10);
                 basket.AddItem(itemId, itemPrice, initialQty);
             }
