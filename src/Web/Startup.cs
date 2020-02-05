@@ -30,7 +30,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-
+using ApplicationCore.Entities;
 using Newtonsoft.Json;
 
 using Web.Extensions;
@@ -54,7 +54,13 @@ namespace Microsoft.eShopWeb.Web
 
         public void ConfigureDevelopmentServices(IServiceCollection services)
         {
-            services.AddSingleton<ICurrencyService, CurrencyServiceStatic>();
+            services.AddSingleton<ICurrencyService>(provider =>
+            {
+                var conversionRulesConfig = Configuration.GetSection("CurrencyGetSet");
+                var conversionRules = conversionRulesConfig.Get<List<CurrencyGetSet>>();
+
+                return new CurrencyServiceStatic(conversionRules);
+            });
 
             // use in-memory database
             ConfigureInMemoryDatabases(services);
