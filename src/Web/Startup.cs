@@ -35,6 +35,7 @@ using Newtonsoft.Json;
 
 using Web.Extensions;
 using Web.Extensions.Middleware;
+using Rotativa.AspNetCore;
 
 [assembly: ApiConventionType(typeof(DefaultApiConventions))]
 namespace Microsoft.eShopWeb.Web
@@ -279,6 +280,7 @@ namespace Microsoft.eShopWeb.Web
                 endpoints.MapHealthChecks("api_health_check");
             });
 
+            RotativaConfiguration.Setup(env);
         }
     }
 }
