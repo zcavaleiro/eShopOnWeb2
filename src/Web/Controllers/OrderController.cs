@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopWeb.Web.Features.MyOrders;
 using Microsoft.eShopWeb.Web.Features.OrderDetails;
 using System.Threading.Tasks;
-using Rotativa.AspNetCore;
+
 
 namespace Microsoft.eShopWeb.Web.Controllers
 {
@@ -38,13 +38,6 @@ namespace Microsoft.eShopWeb.Web.Controllers
                 return BadRequest("No such order found for this user.");
             }
             return View(viewModel);
-        }
-
-        public IActionResult OrderPdf()
-        {
-            //GetOrderDetails myOrderDetail = new GetOrderDetails(orderId);
-
-            return new ViewAsPdf ("MyOrder");
         }
     }
 }
