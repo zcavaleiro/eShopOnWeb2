@@ -280,7 +280,7 @@ namespace Microsoft.eShopWeb.Web
                 endpoints.MapHealthChecks("api_health_check");
             });
 
-            RotativaConfiguration.Setup(env);
+            // RotativaConfiguration.Setup(env);
         }
     }
 }

@@ -42,9 +42,9 @@ namespace Microsoft.eShopWeb.Web.Controllers
 
         public IActionResult OrderPdf()
         {
-            GetOrderDetails myOrderDetail = new GetOrderDetails(orderId);
+            //GetOrderDetails myOrderDetail = new GetOrderDetails(orderId);
 
-            return new ViewAsPdf ("MyOrder", myOrderDetail);
+            return new ViewAsPdf ("MyOrder");
         }
     }
 }
