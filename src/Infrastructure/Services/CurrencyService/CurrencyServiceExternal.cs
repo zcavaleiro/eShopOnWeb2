@@ -9,7 +9,7 @@ namespace Infrastructure.Services.CurrencyService
         /// <inheritdoc />
         public Task<decimal> Convert(decimal value, Currency source, Currency target, CancellationToken cancellationToken = default)
         {
-            throw new System.NotImplementedException();
+            return Task.FromResult(value);
         }
     }
 }
