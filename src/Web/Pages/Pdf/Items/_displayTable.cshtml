@@ -1,0 +1,26 @@
+@model IEnumerable<CatalogItemViewModel>
+
+<Table>
+	<thead>
+		<th></th>
+		<th>Name</th>
+		<th>Price</th>
+	</thead>
+	@foreach (var catalogItem in Model)
+	{
+		<tr>
+			<td><img class="esh-catalog-thumbnail" src="@catalogItem.PictureUri" style="width: 270px;"/></td>
+			<td class="esh-catalog-name">@catalogItem.Name</td>
+			@if(catalogItem.ShowPrice)
+			{
+				<td class="esh-catalog-price">
+					@catalogItem.Price.ToString("N2")
+					<span class="product-price-unit">€</span>
+				</td>
+			}
+			else{
+				<td class="esh-catalog-price">Sob-Consulta</td>
+			}
+		</tr>
+	}
+</table>

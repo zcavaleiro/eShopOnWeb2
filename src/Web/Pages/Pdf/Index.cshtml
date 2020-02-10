@@ -1,0 +1,77 @@
+@page
+@{
+    ViewData["Title"] = "Catalog";
+    Layout = null;
+    var date = DateTime.Now;
+
+    @model IndexPdfModel
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Microsoft.eShopOnWeb</title>
+    <environment names="Development,Azure,Casa">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/css/app.css" />
+        <link rel="stylesheet" href="~/css/app.component.css" />
+        <link rel="stylesheet" href="~/css/shared/components/header/header.css" />
+        <link rel="stylesheet" href="~/css/shared/components/identity/identity.css" />
+        <link rel="stylesheet" href="~/css/shared/components/pager/pager.css" />
+        <link rel="stylesheet" href="~/css/basket/basket.component.css" />
+        <link rel="stylesheet" href="~/css/basket/basket-status/basket-status.component.css" />
+        <link rel="stylesheet" href="~/css/catalog/catalog.component.css" />
+        <link rel="stylesheet" href="~/css/orders/orders.component.css" />
+    </environment>
+    <environment names="Staging,Production">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.5/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+    </environment>
+</head>
+<body>
+        <div class="container">
+
+            @if (Model.CatalogModel.CatalogItems.Any())
+            {
+
+               switch (Model.CatalogModel.ResultView) {
+            case ResultView.Grid:    
+                <partial name="ResultViews/_gridView" for="@Model.CatalogModel.CatalogItems" />        
+                break;
+            case ResultView.List: {
+                Func<dynamic, object> listItemTemplate = @<partial name="_product_mini" for="@item" />;
+                var listViewModel = new ListViewModel {
+                    Items = Model.CatalogModel.CatalogItems,
+                    ItemTemplate = listItemTemplate
+                };
+                <partial name="ResultViews/_listView" for="@listViewModel" />
+                break;
+            }
+            case ResultView.Table:
+                <partial name="ResultViews/_tableView" for="CatalogModel.CatalogItems" />
+                break;
+        }
+
+            }
+            else
+            {
+                <div class="esh-catalog-items row">
+                    THERE ARE NO RESULTS THAT MATCH YOUR SEARCH
+                </div>
+            }
+        </div>
+        <footer class="container">
+            <div class="row">
+                <div class="col-md-2"><h6>@date</h6></div>
+                <div class="col-md-3"></div>
+                <div class="col-md-2">eShopOnWeb</div>
+                <div class="col-md-3"></div>
+                <div class="col-md-2">Pag. @(Model.CatalogModel.PaginationInfo.ActualPage + 1) / @Model.CatalogModel.PaginationInfo.TotalPages</div>
+            </div>
+        </footer>
+</body>
+</html> 

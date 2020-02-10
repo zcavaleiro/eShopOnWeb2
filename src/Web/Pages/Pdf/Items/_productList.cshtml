@@ -1,0 +1,23 @@
+@model CatalogItemViewModel
+
+
+<div class="row">
+    <div class="col-md-4">
+        <img class="esh-catalog-thumbnail" src="@Model.PictureUri" style="width: 220px;">
+    </div>
+    <div class="col-md-6">
+        <div class="esh-catalog-name">
+            <span>@Model.Name</span>
+        </div>
+        <div class="esh-catalog-price">
+            @if(Model.ShowPrice)
+            {
+                <span class="product-price">@Model.Price.ToString("N2")</span>
+                <span class="product-price-unit">€</span>
+            }
+            else{
+                <span>"Sob-Consulta"</span>
+            }
+        </div>        
+    </div>
+</div>

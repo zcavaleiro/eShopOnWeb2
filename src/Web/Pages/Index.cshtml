@@ -3,6 +3,9 @@
     ViewData["Title"] = "Catalog";
     @model IndexModel
 }
+@{
+    var linkpdf = $"/reports/pdf/catalog{HttpContext.Request.QueryString.ToString()}";
+}
 <section class="esh-catalog-hero">
     <div class="container">
         <img class="esh-catalog-title" src="~/images/main_banner_text.png" />
@@ -37,6 +40,7 @@
     @if (Model.CatalogModel.CatalogItems.Any())
     {
         @await Html.PartialAsync("_pagination", Model.CatalogModel.PaginationInfo);
+        <a href="@linkpdf" target="_blank"><img src="images/document/pdf64.png"></a>
 
         switch (Model.CatalogModel.ResultView) {
             case ResultView.Grid:    
