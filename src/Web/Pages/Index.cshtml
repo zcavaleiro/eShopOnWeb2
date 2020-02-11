@@ -31,6 +31,7 @@
             <input type="text" asp-for="@Model.CatalogModel.SearchText"
                 value="@Model.CatalogModel.SearchText" />
             <input class="esh-catalog-send" type="image" src="images/arrow-right.svg" />
+            <a href="@linkpdf" target="_blank"><img src="images/document/pdf64.png" width="32" height="42"></a>
         </form>
     </div>
 </section>
@@ -40,7 +41,7 @@
     @if (Model.CatalogModel.CatalogItems.Any())
     {
         @await Html.PartialAsync("_pagination", Model.CatalogModel.PaginationInfo);
-        <a href="@linkpdf" target="_blank"><img src="images/document/pdf64.png"></a>
+        
 
         switch (Model.CatalogModel.ResultView) {
             case ResultView.Grid:    
