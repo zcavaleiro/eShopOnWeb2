@@ -35,7 +35,8 @@ using Newtonsoft.Json;
 
 using Web.Extensions;
 using Web.Extensions.Middleware;
-
+using System.Globalization;
+using Microsoft.AspNetCore.Mvc.Razor;
 
 [assembly: ApiConventionType(typeof(DefaultApiConventions))]
 namespace Microsoft.eShopWeb.Web
@@ -148,6 +149,7 @@ namespace Microsoft.eShopWeb.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLocalization(Options => Options.ResourcesPath = "Resources");
             ConfigureCookieSettings(services);
 
             services.AddAuthentication();
@@ -195,7 +197,10 @@ namespace Microsoft.eShopWeb.Web
                 options.Conventions.Add(new RouteTokenTransformerConvention(
                     new SlugifyParameterTransformer()));
 
-            });
+            })
+                .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix, opts => { opts.ResourcesPath = "Resources"; })
+                .AddDataAnnotationsLocalization();
+            ;
             services.AddRazorPages(options =>
             {
                 options.Conventions.AuthorizePage("/Basket/Checkout");
@@ -221,6 +226,23 @@ namespace Microsoft.eShopWeb.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var suportedCultures = new List<CultureInfo>
+            {
+                new CultureInfo("pt-PT"),
+                new CultureInfo("en-US")
+            };
+
+            var cultureOptions = new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new AspNetCore.Localization.RequestCulture("en-US"),
+                SupportedCultures = suportedCultures,
+                SupportedUICultures = suportedCultures
+            };
+
+            app.UseRequestLocalization(cultureOptions);
+
+
+
             app.UseBenchmarking();
             app.UseHealthChecks("/health",
                 new HealthCheckOptions

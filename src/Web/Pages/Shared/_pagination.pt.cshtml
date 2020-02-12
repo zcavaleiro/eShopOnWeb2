@@ -1,0 +1,36 @@
+@model PaginationInfoViewModel
+
+@{
+
+	IDictionary<string, string> buildQueryStringDict(string key, string value) {
+		var queryStringDict = Context.Request.Query.Where(x => x.Key.ToString()!="icf").ToDictionary(x => x.Key, x => x.Value.ToString());
+		queryStringDict[key] = value;
+		return queryStringDict;
+	}
+
+	var reference = "CatalogPageModel.PageId";
+	var previous = (Model.ActualPage - 1).ToString();
+	var next     = (Model.ActualPage + 1).ToString();
+}
+
+<div class="esh-pager">
+	<div class="container-fluid">
+		<article class="esh-pager-wrapper row">
+			<nav>
+				<div class="col-md-2 col-xs-12">
+					<a class="esh-pager-item-left esh-pager-item--navigable esh-pager-item @Model.Previous" id="Previous" asp-all-route-data="@buildQueryStringDict(reference, previous)" aria-label="Previous">Anterior</a>
+				</div>
+
+				<div class="col-md-8 col-xs-12">
+					<span class="esh-pager-item">
+						Mostrando @Model.ItemsPerPage de @Model.TotalItems produtos - Página @(Model.ActualPage + 1) - @Model.TotalPages
+					</span>
+				</div>
+
+				<div class="col-md-2 col-xs-12">
+					<a class="esh-pager-item-right esh-pager-item--navigable esh-pager-item @Model.Next" id="Next" asp-all-route-data="@buildQueryStringDict(reference, next)" aria-label="Next">Seguinte</a>
+				</div>
+			</nav>
+		</article>
+	</div>
+</div>
