@@ -63,11 +63,12 @@
                             </div>
                         </div>
                     </div>
-                    <div><p>...</p></div>
+
             </section>
         </div>
     </div>
 </div>
+<a href="#" onclick="signOut();">Sign out</a>
 
 @{
     var googleAuthNSection = Configuration.GetSection("Authentication:Google");
@@ -92,11 +93,17 @@
             var id_token = googleUser.getAuthResponse().id_token;
             console.log("ID Token: " + id_token);
         }
+        
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+            console.log('User signed out.');
+            });
+        }
+
     </script>
 
-<script>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-<div><p>...</p></div>
