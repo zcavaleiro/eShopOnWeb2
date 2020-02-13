@@ -33,6 +33,7 @@ namespace Infrastructure.Services.CurrencyService
 
         private decimal CalculatedConversionValue(Currency source, Currency target)
         {
+            if(source == target){ return 1m;}
             var conversionRule = DEFAULT_RULES.Where(rule => rule.Source == source && rule.Target == target).FirstOrDefault();
             if (conversionRule == null) {
                 throw new Exception("Conversion rule not found");

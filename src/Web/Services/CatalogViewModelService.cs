@@ -13,10 +13,12 @@ using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using Microsoft.Extensions.Configuration;
+using System.Globalization;
 
 namespace Microsoft.eShopWeb.Web.Services
 {
-    
+
     /// <summary>
     /// This is a UI-specific service so belongs in UI project. It does not contain any business logic and works
     /// with UI-specific types (view models and SelectListItem types).
@@ -34,8 +36,11 @@ namespace Microsoft.eShopWeb.Web.Services
 
         private readonly CatalogContext _catalogContext;
 
-        private const Currency DEFAULT_PRICE_UNIT = Currency.USD; // TODO: Get from Configuration
-        private const Currency USER_PRICE_UNIT = Currency.EUR; // TODO: Get from IUserCurrencyService    
+        private readonly IConfiguration _configuration;
+        private Currency default_price_unit = Currency.USD; // TODO: Get from Configuration
+        private Currency user_price_unit = Currency.EUR; // TODO: Get from IUserCurrencyService   
+
+
         public CatalogViewModelService(
             ILoggerFactory loggerFactory,
             IAsyncRepository<CatalogItem> itemRepository,
@@ -43,7 +48,8 @@ namespace Microsoft.eShopWeb.Web.Services
             IAsyncRepository<CatalogType> typeRepository,
             IUriComposer uriComposer,
             ICurrencyService currencyService,
-            CatalogContext catalogContext
+            CatalogContext catalogContext,
+            IConfiguration configuration
         )
         {
             _logger = loggerFactory.CreateLogger<CatalogViewModelService>();
@@ -53,6 +59,12 @@ namespace Microsoft.eShopWeb.Web.Services
             _uriComposer = uriComposer;
             _currencyService = currencyService;
             _catalogContext = catalogContext;
+            _configuration = configuration;
+
+            Enum.TryParse(_configuration["Culture:DefaultCurrencySymbol"], true, out default_price_unit);
+
+            Enum.TryParse(new RegionInfo(CultureInfo.CurrentCulture.Name).ISOCurrencySymbol, true, out user_price_unit);
+
         }
 
         /// <summary>
@@ -63,29 +75,33 @@ namespace Microsoft.eShopWeb.Web.Services
         private async Task<CatalogItemViewModel> CreateCatalogItemViewModelAsync(
             CatalogItem catalogItem,
             bool convertPrice = true,
-            CancellationToken cancellationToken = default(CancellationToken)) {
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
             return new CatalogItemViewModel()
-                {
-                    Id = catalogItem.Id,
-                    Name = catalogItem.Name,
-                    PictureUri = catalogItem.PictureUri,
-                    Price = await (convertPrice
-                        ? _currencyService.Convert(catalogItem.Price, DEFAULT_PRICE_UNIT, USER_PRICE_UNIT, cancellationToken)
+            {
+                Id = catalogItem.Id,
+                Name = catalogItem.Name,
+                PictureUri = catalogItem.PictureUri,
+                Price = await (convertPrice
+                        ? _currencyService.Convert(catalogItem.Price, default_price_unit, user_price_unit, cancellationToken)
                         : Task.FromResult(catalogItem.Price)),
-                    ShowPrice = catalogItem.ShowPrice,
-                    PriceUnit  = USER_PRICE_UNIT
-                };
+                ShowPrice = catalogItem.ShowPrice,
+                PriceUnit = user_price_unit
+            };
         }
 
         private async Task<IReadOnlyList<CatalogItem>> ListCatalogItems(
-            int pageItemsOffset, int itemsPage, int? brandId, int? typeId) {
+            int pageItemsOffset, int itemsPage, int? brandId, int? typeId)
+        {
             var query = _catalogContext.CatalogItems as IQueryable<CatalogItem>;
             var whereExpr = new List<Expression<Func<CatalogItem, bool>>>();
-            if (brandId.HasValue) {
+            if (brandId.HasValue)
+            {
                 query = query.Where(x => x.CatalogBrandId == brandId.Value);
                 whereExpr.Add(x => x.CatalogBrandId == brandId.Value);
             }
-            if (typeId.HasValue) {
+            if (typeId.HasValue)
+            {
                 // query = query.Where(x => x.CatalogTypeId == typeId.Value);
                 whereExpr.Add(x => x.CatalogTypeId == typeId.Value);
             }
@@ -96,7 +112,8 @@ namespace Microsoft.eShopWeb.Web.Services
 
         private Task<int> CountCatalogItems(
             int? brandId, int? typeId
-        ) {
+        )
+        {
             var query = _catalogContext.CatalogItems as IQueryable<CatalogItem>;
             query.Where(catalogItem => (!brandId.HasValue || catalogItem.CatalogBrandId == brandId) &&
                 (!typeId.HasValue || catalogItem.CatalogTypeId == typeId));
@@ -121,7 +138,7 @@ namespace Microsoft.eShopWeb.Web.Services
             // the implementation below using ForEach and Count. We need a List.
             var itemsOnPage = await _itemRepository.ListAsync(filterPaginatedSpecification);
             // var itemsOnPage = await ListCatalogItems(
-               // itemsPage * pageIndex, itemsPage, brandId, typeId);
+            // itemsPage * pageIndex, itemsPage, brandId, typeId);
             var totalItems = await _itemRepository.CountAsync(filterSpecification);
             // var totalItems = await CountCatalogItems(brandId, typeId);
 
@@ -190,25 +207,31 @@ namespace Microsoft.eShopWeb.Web.Services
 
         public async Task<CatalogItemViewModel> GetItemById(int id, bool convertPrice = true, CancellationToken cancellationToken = default(CancellationToken))
         {
-            try {
+            try
+            {
                 var item = await _itemRepository.GetByIdAsync(id);
-                if (item == null) {
+                if (item == null)
+                {
                     throw new ModelNotFoundException($"Catalog item not found. id={id}");
                 }
                 var catalogItemViewModel = await CreateCatalogItemViewModelAsync(
                     item, convertPrice, cancellationToken);
                 return catalogItemViewModel;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 throw new ModelNotFoundException($"Catalog item not found. id={id}", ex);
             }
         }
     }
 
-    public class ModelNotFoundException: Exception {
+    public class ModelNotFoundException : Exception
+    {
 
         public ModelNotFoundException(string message, Exception innerException = null)
-            : base(message, innerException) {
+            : base(message, innerException)
+        {
 
-            }
+        }
     }
 }
