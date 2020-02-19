@@ -36,8 +36,6 @@
     </div>
 </section>
 <div class="container">
-    <p>@Model.CatalogModel.SearchText</p>
-    <p>@Model.CatalogModel.ResultView</p>
     @if (Model.CatalogModel.CatalogItems.Any())
     {
         @await Html.PartialAsync("_pagination", Model.CatalogModel.PaginationInfo);
