@@ -17,6 +17,16 @@
             <td>
                 <form asp-page="/Basket/Index" method="post">
                     <input class="esh-catalog-button" style="width: auto" type="submit" value="[ ADD TO BASKET ]" />
+                        <input type="hidden" asp-for="@catalogItem.Id" name="id" />
+                        <input type="hidden" asp-for="@catalogItem.Name" name="name" />
+                        <input type="hidden" asp-for="@catalogItem.PictureUri" name="pictureUri" />
+                        <input type="hidden" asp-for="@catalogItem.Price" name="price" />
+                </form>
+                <form asp-page="/WishList/Index" method="post">
+                    @if(User.Identity.IsAuthenticated) {
+                        <input type="image" src="~/images/wish.png" style="width:32px;position:relative;top:-32px;right:-142px;"/>
+                    }
+
                     <input type="hidden" asp-for="@catalogItem.Id" name="id" />
                     <input type="hidden" asp-for="@catalogItem.Name" name="name" />
                     <input type="hidden" asp-for="@catalogItem.PictureUri" name="pictureUri" />

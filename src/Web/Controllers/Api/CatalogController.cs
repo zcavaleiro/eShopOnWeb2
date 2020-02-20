@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Microsoft.eShopWeb.Web.ViewModels;
 using System;
+using Microsoft.eShopWeb.ApplicationCore.Constants;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Microsoft.eShopWeb.Web.Controllers.Api
 {
 
+    [Authorize(Roles = AuthorizationConstants.Roles.ADMINISTRATORS)]
     public class CatalogController : BaseApiController
     {
         private readonly ICatalogViewModelService _catalogViewModelService;
@@ -35,8 +38,5 @@ namespace Microsoft.eShopWeb.Web.Controllers.Api
                 return NotFound();
             }
         }
-
-   
-
     }
 }
