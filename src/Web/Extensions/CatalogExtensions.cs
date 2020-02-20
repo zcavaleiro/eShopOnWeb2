@@ -20,6 +20,8 @@ namespace Microsoft.eShopWeb.Web.Services
             services.AddScoped<ICatalogViewModelService, CachedCatalogViewModelService>();
             services.AddScoped<IBasketService, BasketService>();
             services.AddScoped<IBasketViewModelService, BasketViewModelService>();
+            services.AddScoped<IWishListService, WishListService>();
+            services.AddScoped<IWishListViewModelService, WishListViewModelService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<CatalogViewModelService>();
